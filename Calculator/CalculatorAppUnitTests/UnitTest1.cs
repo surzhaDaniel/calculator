@@ -19,66 +19,123 @@ namespace CalculatorAppUnitTests
             _calculator = new Calculator();
         }
 
-        [DataTestMethod]
-        [DataRow("3 + 4", 7.0, DisplayName = "Simple Addition")]
-        [DataRow("5 - 2", 3.0, DisplayName = "Simple Subtraction")]
-        [DataRow("3 * 2", 6.0, DisplayName = "Simple Multiplication")]
-        [DataRow("6 / 2", 3.0, DisplayName = "Simple Division")]
-        [DataRow("3 + 4 * 2", 11.0, DisplayName = "Addition and Multiplication")]
-        [DataRow("(3 + 2) * 4", 20.0, DisplayName = "Parentheses with Multiplication")]
-        [DataRow("2 * (3 + 4 * (2 + 1))", 30.0, DisplayName = "Nested Parentheses")]
-        [DataRow("10 + 20 + 30", 60.0, DisplayName = "Multiple Additions")]
-        [DataRow("100 - 50 - 25", 25.0, DisplayName = "Multiple Subtractions")]
-        [DataRow("2 * 3 * 4", 24.0, DisplayName = "Multiple Multiplications")]
-        [DataRow("16 / 4 / 2", 2.0, DisplayName = "Multiple Divisions")]
-        [DataRow("2.5 + 3.5", 6.0, DisplayName = "Decimal Numbers Addition")]
-        [DataRow("1.5 * 2", 3.0, DisplayName = "Decimal Numbers Multiplication")]
-        [DataRow("1000 * 1000", 1000000.0, DisplayName = "Large Numbers Multiplication")]
-        [DataRow(" 3 + 4 ", 7.0, DisplayName = "Expression with Leading/Trailing Spaces")]
-        [DataRow("5", 5.0, DisplayName = "Single Number")]
-        [DataRow("(1 + (2 + (3 + 4)))", 10.0, DisplayName = "Deeply Nested Parentheses")]
-        [DataRow("((2 * 3) + 4) / (1 + 1)", 5.0, DisplayName = "Complex Expression with All Operators")]
-        [DataRow("10 * (2 + 3) - 4 / 2", 48.0, DisplayName = "Mixed Operators and Parentheses")]
-        [DataRow("1 + 2 * 3 - 4 / 2 + (5 * 2)", 15.0, DisplayName = "All Operators with Parentheses")]
-        public void Evaluate_ValidExpression_ReturnsCorrectResult(string expression, double expected)
+        [TestMethod]
+        public void Evaluate_SimpleAddition_ReturnsCorrectResult()
         {
-            double result = _calculator.Evaluate(expression);
-            Assert.AreEqual(expected, result, 1e-10, $"Failed for expression: {expression}");
+            var result = _calculator.Evaluate("2+3");
+            Assert.AreEqual(5, result);
+        }
+
+        [TestMethod]
+        public void Evaluate_ComplexExpressionWithPriority_ReturnsCorrectResult()
+        {
+            var result = _calculator.Evaluate("2+3*4-5/2");
+            Assert.AreEqual(11.5, result);
+        }
+
+        [TestMethod]
+        public void Evaluate_WithParentheses_ReturnsCorrectResult()
+        {
+            var result = _calculator.Evaluate("(2+3)*4");
+            Assert.AreEqual(20, result);
+        }
+
+        [TestMethod]
+        public void Evaluate_NegativeNumbers_ReturnsCorrectResult()
+        {
+            var result = _calculator.Evaluate("-5+3*-2");
+            Assert.AreEqual(-11, result);
+        }
+
+        [TestMethod]
+        public void Evaluate_DecimalNumbers_ReturnsCorrectResult()
+        {
+            var result = _calculator.Evaluate("3.5*2+1.25");
+            Assert.AreEqual(8.25, result);
+        }
+
+        [TestMethod]
+        public void Evaluate_ExpressionWithSpaces_ReturnsCorrectResult()
+        {
+            var result = _calculator.Evaluate(" 2 + 3 * 4 ");
+            Assert.AreEqual(14, result);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void Evaluate_EmptyExpression_ThrowsArgumentException()
+        public void Evaluate_EmptyInput_ThrowsException()
         {
             _calculator.Evaluate("");
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void Evaluate_InvalidCharacters_ThrowsArgumentException()
+        public void Evaluate_InvalidCharacters_ThrowsException()
         {
-            _calculator.Evaluate("3 + a");
+            _calculator.Evaluate("2+a*3");
         }
 
         [TestMethod]
         [ExpectedException(typeof(DivideByZeroException))]
-        public void Evaluate_DivisionByZero_ThrowsDivideByZeroException()
+        public void Evaluate_DivisionByZero_ThrowsException()
         {
-            _calculator.Evaluate("5 / 0");
+            _calculator.Evaluate("5/0");
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void Evaluate_MismatchedParentheses_ThrowsArgumentException()
+        public void Evaluate_MismatchedParentheses_ThrowsException()
         {
-            _calculator.Evaluate("(3 + 2 * (4 + 1)");
+            _calculator.Evaluate("(2+3*4");
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void Evaluate_InvalidOperatorSequence_ThrowsInvalidOperationException()
+        public void Evaluate_InvalidOperatorSequence_ThrowsException()
         {
-            _calculator.Evaluate("3 + + 4");
+            _calculator.Evaluate("2++3");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Evaluate_StartsWithOperator_ThrowsException()
+        {
+            _calculator.Evaluate("*2+3");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Evaluate_EndsWithOperator_ThrowsException()
+        {
+            _calculator.Evaluate("2+3*");
+        }
+
+        [TestMethod]
+        public void Evaluate_MultipleParentheses_ReturnsCorrectResult()
+        {
+            var result = _calculator.Evaluate("((2+3)*4-(8/2))");
+            Assert.AreEqual(16, result);
+        }
+
+        [TestMethod]
+        public void Evaluate_ComplexNegativeExpressions_ReturnsCorrectResult()
+        {
+            var result = _calculator.Evaluate("(-2+3)*-(-4+5)");
+            Assert.AreEqual(-1, result);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Evaluate_OnlyOperators_ThrowsException()
+        {
+            _calculator.Evaluate("+-*/");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Evaluate_OnlyParentheses_ThrowsException()
+        {
+            _calculator.Evaluate("(()))");
         }
     }
 }
