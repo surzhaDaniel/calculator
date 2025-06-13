@@ -8,8 +8,25 @@ using System.Threading.Tasks;
 
 namespace CalculatorApp.Strategies
 {
+    /// <summary>
+    /// Factory class responsible for creating appropriate input/output strategies based on the specified mode.
+    /// </summary>
     internal class StrategyFactory : IStrategyFactory
     {
+        /// <summary>
+        /// Creates an input/output strategy based on the specified mode and parameters.
+        /// </summary>
+        /// <param name="mode">The mode of operation ("1" for console, "2" for file).</param>
+        /// <param name="calculator">The calculator instance to use for evaluations.</param>
+        /// <param name="inputPath">The path to the input file (required for file mode).</param>
+        /// <param name="outputPath">The path to the output file (required for file mode).</param>
+        /// <returns>An instance of IInputOutputStrategy configured for the specified mode.</returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown when:
+        /// - The mode is empty or null
+        /// - The mode is invalid
+        /// - File paths are empty or null in file mode
+        /// </exception>
         public IInputOutputStrategy Create(string? mode, Calculator calculator, string? inputPath, string? outputPath)
         {
             if (string.IsNullOrWhiteSpace(mode))
